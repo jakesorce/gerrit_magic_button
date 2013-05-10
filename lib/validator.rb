@@ -13,6 +13,11 @@ module Validator
       state = instance_status(instance_id)
       magic_data.update_attributes!(:state => state)
     end
+    
+    def stop_instance(magic_data)
+      puts `ec2stop #{magic_data.instance_id}`
+      magic_data.update_attributes!('state' => 'stopped')
+    end
 
     def self.determine_instance_shutdown
       Dir.chdir(File.expand_path(File.dirname(__FILE__) + '/../')) do |dir|
@@ -25,13 +30,11 @@ module Validator
         )
         MagicData.all.each do |md|
           if md.state == 'running' && md.time_up
-            if Time.now > md.time_up + md.duration.minutes
-              puts `ec2stop #{md.instance_id}`
-              md.update_attributes!('state' => 'stopped')
+            if Time.zone.now > md.time_up + md.duration.minutes
+              stop_instance(md)
             end
           elsif (md.state == 'running' || md.state == 'pending') && !md.time_up && Time.zone.now > md.time_started + 1.hour
-            puts `ec2stop #{md.instance_id}`
-            md.update_attributes!('state' => 'stopped')
+            stop_instance(md)
           end
         end
       end
@@ -54,12 +57,10 @@ module Validator
                   s.close
                   return true
                 rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-                  #try again
                   retry
                 end 
               end
             rescue Timeout::Error
-              #try again
               retry
             end
           end
