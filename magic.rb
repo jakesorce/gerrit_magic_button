@@ -9,7 +9,7 @@ set :database, 'sqlite:///magic.db'
 set :root, File.expand_path('app', File.dirname(__FILE__))
 set :pub, 'public', File.dirname(__FILE__)
 set :main, File.dirname(__FILE__)
-set :ami_id, 'ami-7bbcd012'
+set :ami_id, 'ami-c14e21a8'
 
 class Magic < Sinatra::Application
   @@durations = {'10' => 10, '30' => 30, '1' => '60', '2' => 120, '4' => 240, '8' => 480}  

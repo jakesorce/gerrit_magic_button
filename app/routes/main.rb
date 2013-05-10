@@ -67,10 +67,10 @@ class Magic < Sinatra::Application
       http.read_timeout = nil
       if project == 'canvas-lms'
         request = Net::HTTP::Post.new('/checkout')
-        request.set_form_data({"portal_form_patchset" => "#{patchset}"})
+        request.set_form_data({"portal_form_patchset" => "#{patchset}", :domain => "#{instance_ip}"})
       else
-        request = Net::HTTP::Post.new('/plugin_patchset')
-        request.set_form_data({"plugin_patchset" => "#{redirect_url}"})
+        request = Net::HTTP::Post.new('/plugin_magic')
+        request.set_form_data({"plugin_patchset" => "#{redirect_url.split('=').last}", :domain => "#{instance_ip}"})
       end
       response = http.request(request)
       if response.code == '200'
@@ -84,6 +84,7 @@ class Magic < Sinatra::Application
       puts 'never came up'
       puts `ec2stop #{instance_id}`
       MagicData.find_instance_by_id(instance_id).update_attributes!(:state => 'stopped')
+      #redirect to :magic do what is on line 81 here too
     end
   end
 
