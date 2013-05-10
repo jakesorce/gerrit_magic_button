@@ -14,7 +14,7 @@ module Validator
       magic_data.update_attributes!(:state => state)
     end
     
-    def stop_instance(magic_data)
+    def self.stop_instance(magic_data)
       puts `ec2stop #{magic_data.instance_id}`
       magic_data.update_attributes!('state' => 'stopped')
     end
