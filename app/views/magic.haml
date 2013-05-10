@@ -9,12 +9,12 @@
       - elsif  @spin_error
         = @spin_error
         #spin_link.text-center
-          %a{:href => "#", :id => "spin_error"} See Server Log
+          %a#spin_error{:href => "#"} See Server Log
           %div
-            %textarea{:disabled => 'disabled', :id => "error_log_holder", :class => 'hide'}
+            %textarea#error_log_holder.hide{:disabled => 'disabled'}
           %div
-            %input{:type => 'hidden', :id => 'spin_error_instance_ip', :value => "#{@instance_ip}"}
-    %form{:id => 'generation_form', :method => 'post', :action => '/request_instance', :class => 'form-horizontal'}
+            %input#spin_error_instance_ip{:type => 'hidden', :value => "#{@instance_ip}"}
+    %form#generation_form.form-horizontal{:method => 'post', :action => '/request_instance'}
       %span.label.label-info
         Commit Info:
       .commit-info
@@ -22,7 +22,7 @@
         .control-group
           %label.control-label{:for => "duration"} Instance Duration:
           .controls
-            %select{:id => "duration", :name => "duration"}
+            %select#duration{:name => "duration"}
               %option 
                 10 minutes
               %option 
@@ -37,5 +37,5 @@
                 8 hours
           %input{:name => 'user', :type => 'hidden', :value => "#{@user}"}
       .modal-footer
-        %button{:class => "btn back_to_gerrit"} Cancel
-        %button{:id => "generate_button", :class => "btn btn-primary"} Request Instance
+        %button.btn.back_to_gerrit Cancel
+        %button#generate_button.btn.btn-primary Request Instance
