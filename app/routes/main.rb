@@ -54,52 +54,49 @@ class Magic < Sinatra::Application
       haml :confirmation
     else
       error = 'ERROR: This would exceed the magic instance cap, please try again later.'
-      redirect "#{generate_redirect(user, project, patchset)}&error=#{error}"
+      redirect "#{generate_redirect_url(@user, @project, @patchset)}&error=#{error}"
     end
+  end
+
+  def portal_response(route, action, params = {}) 
+    uri = URI.parse("http://#{@instance_ip}:4567")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.read_timeout = nil
+    request = Net::HTTP::Post.new(route) if action == 'post'
+    request = Net::HTTP::Get.new(route) if action == 'get'
+    request.set_form_data(params)
+    http.request(request)
   end
 
   post '/generate' do
     instance_id = params[:instance_id]
     patchset = params[:patchset]
     project = params[:project]
-    user = params[:user]
-    redirect_url = generate_redirect(user, project, patchset)
-    instance_ip = `ec2-describe-instances #{instance_id}`.split('INSTANCE').last.split(' ')[2]
-    if Validator::PortalHealth.sinatra_ready?(instance_ip)
-      puts 'make post to sinatra and handle'
-      uri = URI.parse("http://#{instance_ip}:4567")
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.read_timeout = nil
+    redirect_url = generate_redirect_url(params[:user], project, patchset)
+    @instance_ip = `ec2-describe-instances #{instance_id}`.split('INSTANCE').last.split(' ')[2]
+    if Validator::PortalHealth.sinatra_ready?(@instance_ip)
       if project == 'canvas-lms'
-        request = Net::HTTP::Post.new('/checkout')
-        request.set_form_data({"portal_form_patchset" => "#{patchset}", :domain => "#{instance_ip}"})
+        response = portal_response('/checkout', 'post', {"portal_form_patchset" => "#{patchset}", :domain => "#{@instance_ip}"})
       else
-        request = Net::HTTP::Post.new('/plugin_magic')
-        request.set_form_data({"plugin_patchset" => "#{redirect_url.split('=').last}", :domain => "#{instance_ip}"})
+       response = portal_response('/plugin_magic', 'post', {"plugin_patchset" => "#{redirect_url.split('=').last}", :domain => "#{@instance_ip}"})
       end
-      response = http.request(request)
       if response.code == '200'
         MagicData.find_by_instance_id(instance_id).update_attributes!(:time_up => Time.zone.now)
-        redirect "http://#{instance_ip}"
+        redirect "http://#{@instance_ip}"
       else
         error = "An Error Occurred While Spinning Up Canvas: #{response.body}"
-        redirect "#{redirect_url}&spinerror=#{error}&instance_ip=#{instance_ip}"
+        redirect "#{redirect_url}&spinerror=#{error}&instance_ip=#{@instance_ip}"
       end
     else
-      puts 'never came up'
       puts `ec2stop #{instance_id}`
       MagicData.find_instance_by_id(instance_id).update_attributes!(:state => 'stopped')
-      #redirect to :magic do what is on line 81 here too
+      redirect "#{redirect_url}&error=Sinatra Server Never Came Up, Try Again..."
     end
   end
 
   get '/error_log' do
-    uri = URI.parse("http://#{params[:instance_ip]}:4567")
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.read_timeout = nil
-    request = Net::HTTP::Get.new('/error_log')
-    response = http.request(request)
-    response.body
+    @instance_ip = params[:instance_ip]
+    portal_response('/error_log', 'get').body
   end
 
   post '/cancel_instance' do
