@@ -13,12 +13,19 @@ set :ami_id, 'ami-c14e21a8'
 
 class Magic < Sinatra::Application
   @@durations = {'10' => 10, '30' => 30, '1' => '60', '2' => 120, '4' => 240, '8' => 480}  
+  Time.zone = 'America/Denver'
+
   register Sinatra::Minify
 
   set :public_folder, settings.pub, File.dirname(__FILE__)
   set :js_path, "#{settings.pub}/javascripts"
   set :js_url, '/javascipts'
+  set :environment, :production
 
   require_relative "#{settings.root}/routes/init"
   require_relative "lib/init"
+
+  before do
+    expires 5001, :public_folder, :must_revalidate
+  end
 end

@@ -18,6 +18,7 @@ module Validator
       Dir.chdir(File.expand_path(File.dirname(__FILE__) + '/../')) do |dir|
         require 'sinatra/activerecord'
         require "#{dir}/app/models/magic_data"
+        Time.zone = 'America/Denver'
         ActiveRecord::Base.establish_connection(
           "adapter" => "sqlite3",
           "database"  => "magic.db"
@@ -28,7 +29,7 @@ module Validator
               puts `ec2stop #{md.instance_id}`
               md.update_attributes!('state' => 'stopped')
             end
-          elsif (md.state == 'running' || md.state == 'pending') && !md.time_up && Time.now > md.time_started + 1.hour
+          elsif (md.state == 'running' || md.state == 'pending') && !md.time_up && Time.zone.now > md.time_started + 1.hour
             puts `ec2stop #{md.instance_id}`
             md.update_attributes!('state' => 'stopped')
           end

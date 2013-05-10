@@ -14,6 +14,10 @@ class Magic < Sinatra::Application
     parts
   end
 
+  def generate_redirect_url(user, project, patchset)
+    "/magic?patchsetinfo=git fetch ssh://#{user}@gerrit.instructure.com:29418/#{project} refs/changes/#{patchset} && git cherry-pick FETCH_HEAD"
+  end
+
   get '/' do
     haml :index
   end
@@ -44,13 +48,13 @@ class Magic < Sinatra::Application
     if Validator::EC2.check_instance_cap
       instance_info = `ec2-run-instances #{settings.ami_id} --instance-type m2.xlarge -g canvasportal`.split('INSTANCE').last.split(' ')
       @instance_id = instance_info[0]
-      md = MagicData.create!(:project => @project, :patchset => @patchset, :instance_id => @instance_id, :user => @user, :state => instance_info[2], :time_started => Time.now, :duration => @converted_duration)
+      md = MagicData.create!(:project => @project, :patchset => @patchset, :instance_id => @instance_id, :user => @user, :state => instance_info[2], :time_started => Time.zone.now, :duration => @converted_duration)
       Validator::EC2.store_instance_info(@instance_id, md)
       puts `ec2addtag #{@instance_id} --tag Name=magic-#{md.id}-#{@user}-#{@patchset}`
       haml :confirmation
     else
       error = 'ERROR: This would exceed the magic instance cap, please try again later.'
-      redirect "/magic?patchsetinfo=git fetch ssh://#{@user}@gerrit.instructure.com:29418/#{@project} refs/changes/#{@patchset} && git cherry-pick FETCH_HEAD&error=#{error}"
+      redirect "#{generate_redirect(user, project, patchset)}&error=#{error}"
     end
   end
 
@@ -58,7 +62,8 @@ class Magic < Sinatra::Application
     instance_id = params[:instance_id]
     patchset = params[:patchset]
     project = params[:project]
-    redirect_url = "/magic?patchsetinfo=git fetch ssh://#{params[:user]}@gerrit.instructure.com:29418/#{project} refs/changes/#{patchset} && git cherry-pick FETCH_HEAD"
+    user = params[:user]
+    redirect_url = generate_redirect(user, project, patchset)
     instance_ip = `ec2-describe-instances #{instance_id}`.split('INSTANCE').last.split(' ')[2]
     if Validator::PortalHealth.sinatra_ready?(instance_ip)
       puts 'make post to sinatra and handle'
@@ -74,7 +79,7 @@ class Magic < Sinatra::Application
       end
       response = http.request(request)
       if response.code == '200'
-        MagicData.find_by_instance_id(instance_id).update_attributes!(:time_up => Time.now)
+        MagicData.find_by_instance_id(instance_id).update_attributes!(:time_up => Time.zone.now)
         redirect "http://#{instance_ip}"
       else
         error = "An Error Occurred While Spinning Up Canvas: #{response.body}"
