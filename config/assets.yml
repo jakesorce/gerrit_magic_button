@@ -1,0 +1,11 @@
+js:
+  vendor:
+    - vendor/bootstrap.min.js
+  base:
+    - magic.js
+css:
+  vendor:
+    - vendor/bootstrap.min.css
+    - vendor/bootstrap-responsive.min.css
+  base:
+    - magic.css

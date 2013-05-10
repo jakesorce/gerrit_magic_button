@@ -1,0 +1,29 @@
+#game_modal {
+  width: 835px !important;
+  left: 43% !important; }
+  #game_modal #game_body {
+    max-height: none !important; }
+
+#loading {
+  width: 130px;
+  height: 130px; }
+
+#error-image {
+  width: 400px; }
+
+#error_log_holder {
+  width: 500px;
+  height: 300px; }
+
+.commit-info input {
+  text-align: center; }
+
+.error-box {
+  color: red;
+  font-weight: bold; }
+
+.hide {
+  display: none; }
+
+.example {
+  font-style: italic; }

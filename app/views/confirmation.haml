@@ -1,0 +1,36 @@
+#game_modal.modal.hide.fade
+  .modal-header
+    %h3
+      Snake!
+  .modal-body#game_body
+    %iframe{:height => "600", :src => "http://ryanflorence.com/snake", :width => "800"}
+  .modal-footer
+    %button#game_hide.btn Hide
+#magic_modal.modal.fade
+  .modal-header
+    %h3#confirmation_header
+      Instance Request Successful!
+  .modal-body
+    #loading-container.hide.text-center
+      #user-info
+        %span.label.label-important Do NOT leave this page
+      %img{:id => 'loading', :src => 'images/loader.gif'}
+    %span.label.label-info
+      Confirmation Info:
+    %form{:id => 'canvas_form', :method => 'post', :action => '/generate', :class => 'form-horizontal'}
+      .commit-info
+        = haml :commit_info
+        .control-group
+          %label.control-label{:for => "duration"} Instance Duration:
+          .controls
+            %input{:id => "duration", :readonly => "readonly", :value => "#{@duration}"} 
+      %input{:type => "hidden", :name => "duration", :value => "#{@duration}"}
+      %input{:type => "hidden", :name => "instance_id", :value => "#{@instance_id}"}
+      %input{:type => "hidden", :name => "user", :value => "#{@user}"}
+      #canvas_info.text-center
+        %span.label.label-info Canvas Username: test
+        %span.label.label-info Canvas Password: password
+  .modal-footer
+    %button{:id => "game_button", :class => "pull-left btn hide"} Play Snake While Waiting?
+    %button{:id => "spin_up_cancel", :class => "btn load-hide"} Cancel
+    %button{:id => "spin_up_canvas", :class => "btn btn-primary load-hide"} Spin Up Canvas

@@ -1,0 +1,9 @@
+.control-group
+  %label.control-label{:for => "project"} Project:
+  .controls
+    %input{:id => "project", :readonly => "readonly", :name => "project", :value => "#{@project}"}/
+.control-group
+  %label.control-label{:for => "patchset"} Patchset:
+  .controls
+    %input{:id => "patchset", :readonly => "readonly", :name => "patchset", :value => "#{@patchset}"}/
+    %a{:href => "#{UrlHelpers.build_gerrit_url(@patchset)}", :class => 'gerrit_link', :target => '_blank'} View in Gerrit

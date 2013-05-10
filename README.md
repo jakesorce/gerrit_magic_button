@@ -1,2 +1,2 @@
-gerrit_magic_button
+Magic Button
 ===================

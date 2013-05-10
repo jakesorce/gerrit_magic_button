@@ -1,0 +1,41 @@
+#magic_modal.modal.hide.fade
+  .modal-header
+    %h3 
+      Hello #{@user}!
+  .modal-body
+    .error-box
+      - if @error
+        = @error
+      - elsif  @spin_error
+        = @spin_error
+        #spin_link.text-center
+          %a{:href => "#", :id => "spin_error"} See Server Log
+          %div
+            %textarea{:disabled => 'disabled', :id => "error_log_holder", :class => 'hide'}
+          %div
+            %input{:type => 'hidden', :id => 'spin_error_instance_ip', :value => "#{@instance_ip}"}
+    %form{:id => 'generation_form', :method => 'post', :action => '/request_instance', :class => 'form-horizontal'}
+      %span.label.label-info
+        Commit Info:
+      .commit-info
+        = haml :commit_info
+        .control-group
+          %label.control-label{:for => "duration"} Instance Duration:
+          .controls
+            %select{:id => "duration", :name => "duration"}
+              %option 
+                10 minutes
+              %option 
+                30 minutes
+              %option 
+                1 hour
+              %option 
+                2 hours
+              %option 
+                4 hours
+              %option
+                8 hours
+          %input{:name => 'user', :type => 'hidden', :value => "#{@user}"}
+      .modal-footer
+        %button{:class => "btn back_to_gerrit"} Cancel
+        %button{:id => "generate_button", :class => "btn btn-primary"} Request Instance
