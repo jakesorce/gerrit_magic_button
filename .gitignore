@@ -18,4 +18,5 @@ magic.db
 # YARD artifacts
 .yardoc
 _yardoc
+schedule.rb
 doc/

@@ -48,7 +48,7 @@ class Magic < Sinatra::Application
     if Validator::EC2.check_instance_cap
       instance_info = `ec2-run-instances #{settings.ami_id} --instance-type m2.xlarge -g canvasportal`.split('INSTANCE').last.split(' ')
       @instance_id = instance_info[0]
-      md = MagicData.create!(:project => @project, :patchset => @patchset, :instance_id => @instance_id, :user => @user, :state => instance_info[2], :time_started => Time.zone.now, :duration => @converted_duration)
+      md = MagicData.create!(:project => @project, :patchset => @patchset, :instance_id => @instance_id, :user => @user, :state => instance_info[2], :time_started => Time.now, :duration => @converted_duration)
       Validator::EC2.store_instance_info(@instance_id, md)
       puts `ec2addtag #{@instance_id} --tag Name=magic-#{md.id}-#{@user}-#{@patchset}`
       haml :confirmation
@@ -81,7 +81,7 @@ class Magic < Sinatra::Application
        response = portal_response('/plugin_magic', 'post', {"plugin_patchset" => "#{redirect_url.split('=').last}", :domain => "#{@instance_ip}"})
       end
       if response.code == '200'
-        MagicData.find_by_instance_id(instance_id).update_attributes!(:time_up => Time.zone.now)
+        MagicData.find_by_instance_id(instance_id).update_attributes!(:time_up => Time.now)
         redirect "http://#{@instance_ip}"
       else
         error = "An Error Occurred While Spinning Up Canvas: #{response.body}"
