@@ -84,7 +84,7 @@ class Magic < Sinatra::Application
         MagicData.find_by_instance_id(instance_id).update_attributes!(:time_up => Time.now)
         redirect "http://#{@instance_ip}"
       else
-        error = "An Error Occurred While Spinning Up Canvas: #{response.body}"
+        error = "An Error Occurred While Spinning Up Canvas"
         redirect "#{redirect_url}&spinerror=#{error}&instance_ip=#{@instance_ip}"
       end
     else
