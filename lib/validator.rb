@@ -1,7 +1,26 @@
+require 'optparse'
+require 'yaml'
+
 module Validator
   module EC2
+    DB = YAML::load_file(File.expand_path(File.dirname(__FILE__) + '/../config/database.yml'))
     @instance_cap = 10
     
+    def self.options
+      options = {}
+      optparse = OptionParser.new do |opts|
+        options[:shutdown] = false
+        opts.on('-s', '--shutdown', 'shutdown') do
+          options[:shutdown] = true
+        end
+      end
+      optparse.parse!
+
+      if options[:shutdown]
+        puts determine_instance_shutdown
+      end
+    end  
+
     def self.check_instance_cap
       MagicData.where("state == 'running' or state == 'pending'").count > @instance_cap ? false : true
     end
@@ -24,10 +43,7 @@ module Validator
         require 'sinatra/activerecord'
         require "#{dir}/app/models/magic_data"
         Time.zone = 'America/Denver'
-        ActiveRecord::Base.establish_connection(
-          "adapter" => "sqlite3",
-          "database"  => "magic.db"
-        )
+        ActiveRecord::Base.establish_connection(adapter: DB['adapter'], database: DB['database'])
         MagicData.all.each do |md|
           if md.state == 'running' && md.time_up
             if Time.zone.now > md.time_up + md.duration.minutes
@@ -71,3 +87,5 @@ module Validator
     end
   end 
 end
+
+Validator::EC2.options

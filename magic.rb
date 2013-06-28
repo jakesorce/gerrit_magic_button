@@ -12,6 +12,7 @@ set :main, File.dirname(__FILE__)
 set :ami_id, 'ami-c14e21a8'
 
 class Magic < Sinatra::Application
+  DB = YAML::load_file(File.expand_path(File.dirname(__FILE__) + '/config/database.yml'))
   @@durations = {'10' => 10, '30' => 30, '1' => '60', '2' => 120, '4' => 240, '8' => 480}  
 
   register Sinatra::Minify
@@ -20,6 +21,7 @@ class Magic < Sinatra::Application
   set :js_path, "#{settings.pub}/javascripts"
   set :js_url, '/javascipts'
   set :environment, :production  
+  set :database, 'sqlite:///magic.db'
 
   require_relative "#{settings.root}/routes/init"
   require_relative "lib/init"
